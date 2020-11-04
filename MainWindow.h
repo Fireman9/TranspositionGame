@@ -13,6 +13,7 @@
 #include <QTimeLine>
 #include <QLabel>
 #include <QTimer>
+#include <QtMath>
 
 #include "Card.h"
 

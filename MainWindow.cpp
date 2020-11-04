@@ -48,19 +48,19 @@ void MainWindow::swapCards(int a, int b)
         cards[b]->setIsSelected(false);
         std::swap(cardPos[a], cardPos[b]);
     }
+    else if(qFabs(cardPos[b]-cardPos[a]) != 1){
+        QTimer timer;
+        cards[a]->setIsSelected(false);
+        cards[b]->setIsSelected(false);
+        msgLabel->setText("Change only neighboring cards");
+        msgLabel->show();
+        timer.singleShot(3000, this, &MainWindow::hideMsg);
+    }
     else if(cardPos[a] > cardPos[b]){
         QTimer timer;
         cards[a]->setIsSelected(false);
         cards[b]->setIsSelected(false);
         msgLabel->setText("Left card bigger than right");
-        msgLabel->show();
-        timer.singleShot(3000, this, &MainWindow::hideMsg);
-    }
-    else if(cardPos[b]-cardPos[a] != 1){
-        QTimer timer;
-        cards[a]->setIsSelected(false);
-        cards[b]->setIsSelected(false);
-        msgLabel->setText("Change only neighboring cards");
         msgLabel->show();
         timer.singleShot(3000, this, &MainWindow::hideMsg);
     }
