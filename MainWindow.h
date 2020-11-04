@@ -9,6 +9,8 @@
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QVector>
+#include <QGraphicsItemAnimation>
+#include <QTimeLine>
 
 #include "Card.h"
 

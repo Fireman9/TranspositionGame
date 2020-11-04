@@ -24,14 +24,20 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::swapCards(int a, int b)
 {
+    QGraphicsItemAnimation *animation1 = new QGraphicsItemAnimation();
+    QTimeLine *timer = new QTimeLine(1000);
+    animation1->setItem(cards[a]);
+    animation1->setTimeLine(timer);
+    QGraphicsItemAnimation *animation2 = new QGraphicsItemAnimation();
+    animation2->setItem(cards[b]);
+    animation2->setTimeLine(timer);
     qreal tempX = 0;
     qreal tempY = 0;
     tempX = cards[a]->x();
     tempY = cards[a]->y();
-    cards[a]->setX(cards[b]->x());
-    cards[a]->setY(cards[b]->y());
-    cards[b]->setX(tempX);
-    cards[b]->setY(tempY);
+    animation1->setPosAt(1, QPointF(cards[b]->x(), cards[b]->y()));
+    animation2->setPosAt(1, QPointF(tempX, tempY));
+    timer->start();
     cards[a]->setIsSelected(false);
     cards[b]->setIsSelected(false);
 }
