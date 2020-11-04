@@ -11,6 +11,8 @@
 #include <QVector>
 #include <QGraphicsItemAnimation>
 #include <QTimeLine>
+#include <QLabel>
+#include <QTimer>
 
 #include "Card.h"
 
@@ -35,8 +37,11 @@ private:
     QWidget *widget;
     QGridLayout *gridLayout;
     QVector<Card*> cards;
+    QVector<int> cardPos;
+    QLabel *msgLabel;
 //    Card *card;
 public slots:
     void onSelection();
+    void hideMsg();
 };
 #endif // MAINWINDOW_H
