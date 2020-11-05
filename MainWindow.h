@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QWidget>
 #include <QGridLayout>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QStyle>
 #include <QDesktopWidget>
 #include <QGraphicsView>
@@ -13,6 +15,8 @@
 #include <QTimeLine>
 #include <QLabel>
 #include <QTimer>
+#include <QPushButton>
+#include <QRadioButton>
 #include <QtMath>
 
 #include "Card.h"
@@ -30,6 +34,7 @@ public:
     void swapCards(int a, int b);
     ~MainWindow();
     void startGame();
+    void aiTurn();
 
 private:
     Ui::MainWindow *ui;
@@ -37,12 +42,22 @@ private:
     QGraphicsScene *scene;
     QWidget *widget;
     QGridLayout *gridLayout;
+    QVBoxLayout *vBoxLayout;
+    QHBoxLayout *hBoxLayout;
     QVector<Card*> cards;
     QVector<int> cardPos;
     QLabel *msgLabel;
-//    Card *card;
+    QPushButton *newGameBut;
+    QRadioButton *redBut;
+    QRadioButton *greenBut;
+    int turn = 1;
+    // 1 -- Player turn, 0 -- AI turn
+    int playerColor = 0;
+    // 0 -- green, 1 -- red
 public slots:
     void onSelection();
     void hideMsg();
+    void onAnimationEnd();
+    void newGameButtonClicked();
 };
 #endif // MAINWINDOW_H

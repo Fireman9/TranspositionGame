@@ -21,9 +21,33 @@ MainWindow::MainWindow(QWidget *parent)
     msgLabel->hide();
     this->graphicsView = new QGraphicsView();
     gridLayout->addWidget(graphicsView);
+    newGameBut = new QPushButton("New Game");
+    connect(newGameBut, SIGNAL(released()), this, SLOT(newGameButtonClicked()));
+    newGameBut->setStyleSheet("font-size: 38px; font-family: 'Signika', sans-serif;");
+    this->vBoxLayout = new QVBoxLayout();
+    this->hBoxLayout = new QHBoxLayout();
+    this->greenBut = new QRadioButton("Green");
+    this->greenBut->setChecked(true);
+    greenBut->setStyleSheet("font-size: 20px; font-family: 'Signika', sans-serif; margin-left: 200px;");
+    this->redBut = new QRadioButton("Red");
+    redBut->setStyleSheet("font-size: 20px; font-family: 'Signika', sans-serif; margin-left: 200px;");
+    vBoxLayout->addWidget(greenBut);
+    vBoxLayout->addWidget(redBut);
+    hBoxLayout->addWidget(newGameBut);
+    hBoxLayout->addLayout(vBoxLayout);
+    gridLayout->addLayout(hBoxLayout, 2, 0);
     this->scene = new QGraphicsScene();
     graphicsView->setScene(scene);
     setCentralWidget(widget);
+    for(int i = 1; i <= 8; i++){
+        this->cards.push_back(new Card(i));
+    }
+    for(int i = 0; i < 8; i++){
+        this->scene->addItem(cards[i]);
+    }
+    for(int i = 0; i < 8; i++){
+        connect(cards[i], &Card::clicked, this, &MainWindow::onSelection);
+    }
     startGame();
 }
 
@@ -32,6 +56,7 @@ void MainWindow::swapCards(int a, int b)
     if(cardPos[a] < cardPos[b] && cardPos[b]-cardPos[a] == 1){
         QGraphicsItemAnimation *animation1 = new QGraphicsItemAnimation();
         QTimeLine *timer = new QTimeLine(1000);
+        connect(timer, SIGNAL(finished()), SLOT(onAnimationEnd()));
         animation1->setItem(cards[a]);
         animation1->setTimeLine(timer);
         QGraphicsItemAnimation *animation2 = new QGraphicsItemAnimation();
@@ -43,10 +68,16 @@ void MainWindow::swapCards(int a, int b)
         tempY = cards[a]->y();
         animation1->setPosAt(1, QPointF(cards[b]->x(), cards[b]->y()));
         animation2->setPosAt(1, QPointF(tempX, tempY));
-        timer->start();
         cards[a]->setIsSelected(false);
         cards[b]->setIsSelected(false);
         std::swap(cardPos[a], cardPos[b]);
+        if(this->turn == 0){
+            turn = 1;
+        }
+        else{
+            turn = 0;
+        }
+        timer->start();
     }
     else if(qFabs(cardPos[b]-cardPos[a]) != 1){
         QTimer timer;
@@ -73,19 +104,34 @@ MainWindow::~MainWindow()
 
 void MainWindow::startGame()
 {
-    for(int i = 1; i <= 8; i++){
-        this->cards.push_back(new Card(i));
-    }
     for(int i = 0, j = -4; i < 8; i++, j++){
-        this->scene->addItem(cards[i]);
         cards[i]->setPos(j * 120, 0);
     }
-    for(int i = 0; i < 8; i++){
-        connect(cards[i], &Card::clicked, this, &MainWindow::onSelection);
-    }
+    this->cardPos.clear();
     for(int i = 0; i < 8; i++){
         this->cardPos.push_back(i);
     }
+    if(greenBut->isChecked()){
+        this->playerColor = 0;
+    }
+    else{
+        this->playerColor = 1;
+    }
+    if(this->playerColor == 0){
+        this->turn = 1;
+    }
+    else{
+        this->turn = 0;
+    }
+    if(this->turn == 0){
+        aiTurn();
+    }
+}
+
+void MainWindow::aiTurn()
+{
+
+    swapCards(0, 1);
 }
 
 void MainWindow::onSelection()
@@ -96,15 +142,37 @@ void MainWindow::onSelection()
             selectedCardNumbers.push_back(i);
         }
     }
-    if(selectedCardNumbers.size() == 2){
-        swapCards(selectedCardNumbers[0], selectedCardNumbers[1]);
+    if(this->turn == 1){
+        if(selectedCardNumbers.size() == 2){
+            swapCards(selectedCardNumbers[0], selectedCardNumbers[1]);
+        }
+        else{
+            selectedCardNumbers.clear();
+        }
     }
     else{
+        cards[selectedCardNumbers[0]]->setIsSelected(false);
         selectedCardNumbers.clear();
+        QTimer timer;
+        msgLabel->setText("It isn't your turn");
+        msgLabel->show();
+        timer.singleShot(3000, this, &MainWindow::hideMsg);
     }
 }
 
 void MainWindow::hideMsg()
 {
     this->msgLabel->hide();
+}
+
+void MainWindow::onAnimationEnd()
+{
+    if(this->turn == 0){
+        aiTurn();
+    }
+}
+
+void MainWindow::newGameButtonClicked()
+{
+    startGame();
 }
