@@ -35,6 +35,7 @@ public:
     ~MainWindow();
     void startGame();
     void aiTurn();
+    bool checkForWin();
 
 private:
     Ui::MainWindow *ui;

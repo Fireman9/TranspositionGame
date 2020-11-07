@@ -71,11 +71,16 @@ void MainWindow::swapCards(int a, int b)
         cards[a]->setIsSelected(false);
         cards[b]->setIsSelected(false);
         std::swap(cardPos[a], cardPos[b]);
-        if(this->turn == 0){
-            turn = 1;
+        if(!checkForWin()){
+            if(this->turn == 0){
+                turn = 1;
+            }
+            else{
+                turn = 0;
+            }
         }
         else{
-            turn = 0;
+            this->turn = -1;
         }
         timer->start();
     }
@@ -130,8 +135,38 @@ void MainWindow::startGame()
 
 void MainWindow::aiTurn()
 {
+    this->turn = 1;
+//    swapCards(0, 1);
+}
 
-    swapCards(0, 1);
+bool MainWindow::checkForWin()
+{
+    bool end = false;
+    if(cardPos[6] < cardPos[4] && cardPos[4] < cardPos[2] && cardPos[2]< cardPos[0]){
+        if(this->playerColor == 0){
+            this->msgLabel->setText("Green won, you won!");
+            this->msgLabel->setStyleSheet("color: #008000; font-size: 48px; font-family: 'Signika', sans-serif;");
+            this->msgLabel->show();
+        }
+        else{
+            this->msgLabel->setText("Green won, you lost!");
+            this->msgLabel->setStyleSheet("color: #008000; font-size: 48px; font-family: 'Signika', sans-serif;");
+            this->msgLabel->show();
+        }
+        end = true;
+    }
+    else if(cardPos[7] < cardPos[5] && cardPos[5] < cardPos[3] && cardPos[3] < cardPos[1]){
+        if(this->playerColor == 1){
+            this->msgLabel->setText("Red won, you won!");
+            this->msgLabel->show();
+        }
+        else{
+            this->msgLabel->setText("Red won, you lost!");
+            this->msgLabel->show();
+        }
+        end = true;
+    }
+    return end;
 }
 
 void MainWindow::onSelection()
@@ -149,6 +184,11 @@ void MainWindow::onSelection()
         else{
             selectedCardNumbers.clear();
         }
+    }
+    else if(this->turn == -1){
+        cards[selectedCardNumbers[0]]->setIsSelected(false);
+        selectedCardNumbers.clear();
+        return;
     }
     else{
         cards[selectedCardNumbers[0]]->setIsSelected(false);
@@ -174,5 +214,7 @@ void MainWindow::onAnimationEnd()
 
 void MainWindow::newGameButtonClicked()
 {
+    this->msgLabel->hide();
+    this->msgLabel->setStyleSheet("color: #ff4411; font-size: 48px; font-family: 'Signika', sans-serif;");
     startGame();
 }
