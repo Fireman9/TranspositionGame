@@ -20,6 +20,7 @@
 #include <QtMath>
 
 #include "Card.h"
+#include "DecisionTree.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -36,6 +37,7 @@ public:
     void startGame();
     void aiTurn();
     bool checkForWin();
+    void calcCountRec(DecisionTree *tree);
 
 private:
     Ui::MainWindow *ui;

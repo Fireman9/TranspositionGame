@@ -135,7 +135,16 @@ void MainWindow::startGame()
 
 void MainWindow::aiTurn()
 {
-    this->turn = 1;
+    QVector<int> cards;
+    for(int i = 0; i < 8; i++){
+        cards.push_back(0);
+    }
+    for(int i = 0; i < 8; i++){
+        cards[cardPos[i]] = i;
+    }
+    DecisionTree *tree = new DecisionTree(cards, 0, 0, 0);
+    calcCountRec(tree);
+//    this->turn = 1;
 //    swapCards(0, 1);
 }
 
@@ -167,6 +176,273 @@ bool MainWindow::checkForWin()
         end = true;
     }
     return end;
+}
+
+void MainWindow::calcCountRec(DecisionTree *tree)
+{
+    for(int i = 0; i < tree->childs.size(); i++){
+        int index;
+        // Якщо граємо за зелених
+        if(this->playerColor == 1){
+            // Якщо свап тільки наших карт
+            if(tree->childs[i]->a % 2 == 0 && tree->childs[i]->b % 2 == 0){
+                tree->childs[i]->count = 1;
+            }
+            // Свап нашої карти зліва направо
+            else if(tree->childs[i]->a % 2 == 0 && tree->childs[i]->b % 2 != 0){
+                for(int j = 0; j < 8; j++){
+                    if(tree->childs[i]->cards[j] == tree->childs[i]->a){
+                        index = j;
+                    }
+                }
+                if(index != 7){
+                    // Якщо права карта наша
+                    if(tree->childs[i]->cards[index + 1] % 2 == 0){
+                        if(index != 1){
+                            // карти противника пішли в протилежну сторону
+                            if(tree->childs[i]->b == 1 || tree->childs[i]->b == 3){
+                                // карта пішла до карт противника
+                                if(tree->childs[i]->cards[index - 2] % 2 != 0){
+                                    tree->childs[i]->count = 2;
+                                }
+                                // карта пішла до нашої карти
+                                else{
+                                    tree->childs[i]->count = 3;
+                                }
+                            }
+                            // карти противника пішли в правильну сторону
+                            if(tree->childs[i]->b == 5 || tree->childs[i]->b == 7){
+                                // карта пішла до карт противника
+                                if(tree->childs[i]->cards[index - 2] % 2 != 0){
+                                    tree->childs[i]->count = 1;
+                                }
+                                // карта пішла до нашої карти
+                                else{
+                                    tree->childs[i]->count = 2;
+                                }
+                            }
+                        }
+                        // Якщо наша карта стала 2ю, а протиника - 1ю
+                        else{
+                            tree->childs[i]->count = 3;
+                        }
+                    }
+                    // Якщо права карта противника
+                    else{
+                        if(index != 1){
+                            // Правильний напрям свапу нашої карти
+                            if(tree->childs[i]->a == 0 || tree->childs[i]->a == 2){
+                                tree->childs[i]->count = 0;
+                            }
+                            // Неправильний напрям свапу нашої карти
+                            if(tree->childs[i]->a == 4 || tree->childs[i]->a == 6){
+                                tree->childs[i]->count = -1;
+                            }
+                        }
+                        else{
+                            tree->childs[i]->count = 1;
+                        }
+                    }
+                }
+                else{
+                    tree->childs[i]->count = -1;
+                }
+            }
+            // Свап нашої карти справа наліво
+            else if(tree->childs[i]->a % 2 != 0 && tree->childs[i]->b % 2 == 0){
+                for(int j = 0; j < 8; j++){
+                    if(tree->childs[i]->cards[j] == tree->childs[i]->b){
+                        index = j;
+                    }
+                }
+                if(index != 0){
+                    // Якщо ліва карта наша
+                    if(tree->childs[i]->cards[index - 1] % 2 == 0){
+                        if(index != 6){
+                            // карти противника пішли в протилежну сторону
+                            if(tree->childs[i]->a == 5 || tree->childs[i]->a == 7){
+                                // карта пішла до карт противника
+                                if(tree->childs[i]->cards[index + 2] % 2 != 0){
+                                    tree->childs[i]->count = 2;
+                                }
+                                // карта пішла до нашої карти
+                                else{
+                                    tree->childs[i]->count = 3;
+                                }
+                            }
+                            // карти противника пішли в правильну сторону
+                            if(tree->childs[i]->a == 1 || tree->childs[i]->a == 3){
+                                // карта пішла до карт противника
+                                if(tree->childs[i]->cards[index + 2] % 2 != 0){
+                                    tree->childs[i]->count = 1;
+                                }
+                                // карта пішла до нашої карти
+                                else{
+                                    tree->childs[i]->count = 2;
+                                }
+                            }
+                        }
+                        else{
+                            tree->childs[i]->count = 3;
+                        }
+                    }
+                    // Якщо ліва карта противника
+                    else{
+                        if(index != 6){
+                            // Правильний напрям свапу нашої карти
+                            if(tree->childs[i]->b == 0 || tree->childs[i]->b == 2){
+                                tree->childs[i]->count = -1;
+                            }
+                            // Неправильний напрям свапу нашої карти
+                            if(tree->childs[i]->b == 4 || tree->childs[i]->b == 6){
+                                tree->childs[i]->count = 0;
+                            }
+                        }
+                        else{
+                            tree->childs[i]->count = 1;
+                        }
+                    }
+                }
+                else{
+                    tree->childs[i]->count = -1;
+                }
+            }
+            // Свап не наших карт
+            else{
+                tree->childs[i]->count = -3;
+            }
+        }
+        // Якщо граємо за червоних
+        else{
+            // Якщо свап тільки наших карт
+            if(tree->childs[i]->a % 2 != 0 && tree->childs[i]->b % 2 != 0){
+                tree->childs[i]->count = 1;
+            }
+            // Свап нашої карти зліва направо
+            else if(tree->childs[i]->a % 2 != 0 && tree->childs[i]->b % 2 == 0){
+                for(int j = 0; j < 8; j++){
+                    if(tree->childs[i]->cards[j] == tree->childs[i]->a){
+                        index = j;
+                    }
+                }
+                if(index != 7){
+                    // Якщо права карта наша
+                    if(tree->childs[i]->cards[index + 1] % 2 != 0){
+                        if(index != 1){
+                            // карти противника пішли в протилежну сторону
+                            if(tree->childs[i]->b == 0 || tree->childs[i]->b == 2){
+                                // карта пішла до карт противника
+                                if(tree->childs[i]->cards[index - 2] % 2 == 0){
+                                    tree->childs[i]->count = 2;
+                                }
+                                // карта пішла до нашої карти
+                                else{
+                                    tree->childs[i]->count = 3;
+                                }
+                            }
+                            // карти противника пішли в правильну сторону
+                            if(tree->childs[i]->b == 4 || tree->childs[i]->b == 6){
+                                // карта пішла до карт противника
+                                if(tree->childs[i]->cards[index - 2] % 2 == 0){
+                                    tree->childs[i]->count = 1;
+                                }
+                                // карта пішла до нашої карти
+                                else{
+                                    tree->childs[i]->count = 2;
+                                }
+                            }
+                        }
+                        // Якщо наша карта стала 2ю, а протиника - 1ю
+                        else{
+                            tree->childs[i]->count = 3;
+                        }
+                    }
+                    // Якщо права карта противника
+                    else{
+                        if(index != 1){
+                            // Правильний напрям свапу нашої карти
+                            if(tree->childs[i]->a == 1 || tree->childs[i]->a == 3){
+                                tree->childs[i]->count = 0;
+                            }
+                            // Неправильний напрям свапу нашої карти
+                            if(tree->childs[i]->a == 5 || tree->childs[i]->a == 7){
+                                tree->childs[i]->count = -1;
+                            }
+                        }
+                        else{
+                            tree->childs[i]->count = 1;
+                        }
+                    }
+                }
+                else{
+                    tree->childs[i]->count = -1;
+                }
+            }
+            // Свап нашої карти справа наліво
+            else if(tree->childs[i]->a % 2 == 0 && tree->childs[i]->b % 2 != 0){
+                for(int j = 0; j < 8; j++){
+                    if(tree->childs[i]->cards[j] == tree->childs[i]->b){
+                        index = j;
+                    }
+                }
+                if(index != 0){
+                    // Якщо ліва карта наша
+                    if(tree->childs[i]->cards[index - 1] % 2 != 0){
+                        if(index != 6){
+                            // карти противника пішли в протилежну сторону
+                            if(tree->childs[i]->a == 4 || tree->childs[i]->a == 6){
+                                // карта пішла до карт противника
+                                if(tree->childs[i]->cards[index + 2] % 2 == 0){
+                                    tree->childs[i]->count = 2;
+                                }
+                                // карта пішла до нашої карти
+                                else{
+                                    tree->childs[i]->count = 3;
+                                }
+                            }
+                            // карти противника пішли в правильну сторону
+                            if(tree->childs[i]->a == 0 || tree->childs[i]->a == 2){
+                                // карта пішла до карт противника
+                                if(tree->childs[i]->cards[index + 2] % 2 == 0){
+                                    tree->childs[i]->count = 1;
+                                }
+                                // карта пішла до нашої карти
+                                else{
+                                    tree->childs[i]->count = 2;
+                                }
+                            }
+                        }
+                        else{
+                            tree->childs[i]->count = 3;
+                        }
+                    }
+                    // Якщо ліва карта противника
+                    else{
+                        if(index != 6){
+                            // Правильний напрям свапу нашої карти
+                            if(tree->childs[i]->b == 1 || tree->childs[i]->b == 3){
+                                tree->childs[i]->count = -1;
+                            }
+                            // Неправильний напрям свапу нашої карти
+                            if(tree->childs[i]->b == 5 || tree->childs[i]->b == 7){
+                                tree->childs[i]->count = 0;
+                            }
+                        }
+                        else{
+                            tree->childs[i]->count = 1;
+                        }
+                    }
+                }
+                else{
+                    tree->childs[i]->count = -1;
+                }
+            }
+            // Свап не наших карт
+            else{
+                tree->childs[i]->count = -3;
+            }
+        }
+    }
 }
 
 void MainWindow::onSelection()
