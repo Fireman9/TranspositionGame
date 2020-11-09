@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
 //    int x = (screenGeometry.width()-this->width()) / 2;
 //    int y = (screenGeometry.height()-this->height()) / 2;
 //    this->move(x, y);
-    setWindowTitle("Transition");
+    setWindowTitle("Transposition");
     this->widget = new QWidget();
     this->gridLayout = new QGridLayout();
     widget->setLayout(gridLayout);
@@ -188,12 +188,6 @@ void MainWindow::calcCountRec(DecisionTree *tree, int alpha, int beta)
     int currentAlpha = alpha;
     int currentBeta = beta;
     for(int i = 0; i < tree->childs.size(); i++){
-        if(tree->childs[i]->count > alpha){
-            alpha = tree->childs[i]->count;
-        }
-        if(tree->childs[i]->count < beta){
-            beta = tree->childs[i]->count;
-        }
         int index;
         int aiColor = this->playerColor;
         if(tree->childs[i]->depth == 2 && this->playerColor == 1){
@@ -465,13 +459,11 @@ void MainWindow::calcCountRec(DecisionTree *tree, int alpha, int beta)
         if(tree->childs[i]->depth == 2){
             tree->childs[i]->count = 0 - tree->childs[i]->count;
         }
-        if(tree->depth == 1){
-            currentAlpha = tree->childs[0]->count;
+        if(tree->childs[i]->count > alpha){
+            currentAlpha = tree->childs[i]->count;
         }
-        else{
-            if(tree->childs.size() > 0){
-                currentBeta = tree->childs[0]->count;
-            }
+        if(tree->childs[i]->count < beta){
+            currentBeta = tree->childs[i]->count;
         }
         if(currentAlpha > currentBeta)continue;
         calcCountRec(tree->childs[i], currentAlpha, currentBeta);
