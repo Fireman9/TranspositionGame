@@ -143,9 +143,14 @@ void MainWindow::aiTurn()
         cards[cardPos[i]] = i;
     }
     DecisionTree *tree = new DecisionTree(cards, 0, 0, 0);
-    calcCountRec(tree);
-//    this->turn = 1;
-//    swapCards(0, 1);
+    tree->count = 0;
+    int alpha = -100;
+    int beta = 100;
+    calcCountRec(tree, alpha, beta);
+    int bestDecision = 0;
+    int bestDecisionValue = 0;
+    countBestDec(tree, bestDecision, bestDecisionValue);
+    swapCards(tree->childs[bestDecision]->a, tree->childs[bestDecision]->b);
 }
 
 bool MainWindow::checkForWin()
@@ -178,12 +183,27 @@ bool MainWindow::checkForWin()
     return end;
 }
 
-void MainWindow::calcCountRec(DecisionTree *tree)
+void MainWindow::calcCountRec(DecisionTree *tree, int alpha, int beta)
 {
+    int currentAlpha = alpha;
+    int currentBeta = beta;
     for(int i = 0; i < tree->childs.size(); i++){
+        if(tree->childs[i]->count > alpha){
+            alpha = tree->childs[i]->count;
+        }
+        if(tree->childs[i]->count < beta){
+            beta = tree->childs[i]->count;
+        }
         int index;
+        int aiColor = this->playerColor;
+        if(tree->childs[i]->depth == 2 && this->playerColor == 1){
+            aiColor = 0;
+        }
+        else if(tree->childs[i]->depth == 2 && this->playerColor == 0){
+            aiColor = 1;
+        }
         // Якщо граємо за зелених
-        if(this->playerColor == 1){
+        if(aiColor == 1){
             // Якщо свап тільки наших карт
             if(tree->childs[i]->a % 2 == 0 && tree->childs[i]->b % 2 == 0){
                 tree->childs[i]->count = 1;
@@ -203,22 +223,22 @@ void MainWindow::calcCountRec(DecisionTree *tree)
                             if(tree->childs[i]->b == 1 || tree->childs[i]->b == 3){
                                 // карта пішла до карт противника
                                 if(tree->childs[i]->cards[index - 2] % 2 != 0){
-                                    tree->childs[i]->count = 2;
+                                    tree->childs[i]->count = 1;
                                 }
                                 // карта пішла до нашої карти
                                 else{
-                                    tree->childs[i]->count = 3;
+                                    tree->childs[i]->count = 2;
                                 }
                             }
                             // карти противника пішли в правильну сторону
                             if(tree->childs[i]->b == 5 || tree->childs[i]->b == 7){
                                 // карта пішла до карт противника
                                 if(tree->childs[i]->cards[index - 2] % 2 != 0){
-                                    tree->childs[i]->count = 1;
+                                    tree->childs[i]->count = 0;
                                 }
                                 // карта пішла до нашої карти
                                 else{
-                                    tree->childs[i]->count = 2;
+                                    tree->childs[i]->count = 1;
                                 }
                             }
                         }
@@ -263,22 +283,22 @@ void MainWindow::calcCountRec(DecisionTree *tree)
                             if(tree->childs[i]->a == 5 || tree->childs[i]->a == 7){
                                 // карта пішла до карт противника
                                 if(tree->childs[i]->cards[index + 2] % 2 != 0){
-                                    tree->childs[i]->count = 2;
+                                    tree->childs[i]->count = 1;
                                 }
                                 // карта пішла до нашої карти
                                 else{
-                                    tree->childs[i]->count = 3;
+                                    tree->childs[i]->count = 2;
                                 }
                             }
                             // карти противника пішли в правильну сторону
                             if(tree->childs[i]->a == 1 || tree->childs[i]->a == 3){
                                 // карта пішла до карт противника
                                 if(tree->childs[i]->cards[index + 2] % 2 != 0){
-                                    tree->childs[i]->count = 1;
+                                    tree->childs[i]->count = 0;
                                 }
                                 // карта пішла до нашої карти
                                 else{
-                                    tree->childs[i]->count = 2;
+                                    tree->childs[i]->count = 1;
                                 }
                             }
                         }
@@ -333,22 +353,22 @@ void MainWindow::calcCountRec(DecisionTree *tree)
                             if(tree->childs[i]->b == 0 || tree->childs[i]->b == 2){
                                 // карта пішла до карт противника
                                 if(tree->childs[i]->cards[index - 2] % 2 == 0){
-                                    tree->childs[i]->count = 2;
+                                    tree->childs[i]->count = 1;
                                 }
                                 // карта пішла до нашої карти
                                 else{
-                                    tree->childs[i]->count = 3;
+                                    tree->childs[i]->count = 2;
                                 }
                             }
                             // карти противника пішли в правильну сторону
                             if(tree->childs[i]->b == 4 || tree->childs[i]->b == 6){
                                 // карта пішла до карт противника
                                 if(tree->childs[i]->cards[index - 2] % 2 == 0){
-                                    tree->childs[i]->count = 1;
+                                    tree->childs[i]->count = 0;
                                 }
                                 // карта пішла до нашої карти
                                 else{
-                                    tree->childs[i]->count = 2;
+                                    tree->childs[i]->count = 1;
                                 }
                             }
                         }
@@ -393,11 +413,11 @@ void MainWindow::calcCountRec(DecisionTree *tree)
                             if(tree->childs[i]->a == 4 || tree->childs[i]->a == 6){
                                 // карта пішла до карт противника
                                 if(tree->childs[i]->cards[index + 2] % 2 == 0){
-                                    tree->childs[i]->count = 2;
+                                    tree->childs[i]->count = 1;
                                 }
                                 // карта пішла до нашої карти
                                 else{
-                                    tree->childs[i]->count = 3;
+                                    tree->childs[i]->count = 2;
                                 }
                             }
                             // карти противника пішли в правильну сторону
@@ -442,6 +462,54 @@ void MainWindow::calcCountRec(DecisionTree *tree)
                 tree->childs[i]->count = -3;
             }
         }
+        if(tree->childs[i]->depth == 2){
+            tree->childs[i]->count = 0 - tree->childs[i]->count;
+        }
+        if(tree->depth == 1){
+            currentAlpha = tree->childs[0]->count;
+        }
+        else{
+            if(tree->childs.size() > 0){
+                currentBeta = tree->childs[0]->count;
+            }
+        }
+        if(currentAlpha > currentBeta)continue;
+        calcCountRec(tree->childs[i], currentAlpha, currentBeta);
+    }
+}
+
+void MainWindow::countBestDec(DecisionTree *tree, int& bestChildIndex, int& bestChildValue)
+{
+    int bestIndex = 0;
+    int bestValue = 0;
+    if(tree->childs.size() > 0){
+        if(tree->childs[0]->depth == 2){
+            bestChildIndex = 0;
+            bestChildValue = 100;
+        }
+        else{
+            bestChildIndex = 0;
+            bestChildValue = -100;
+        }
+
+    }
+    for(int i = 0; i < tree->childs.size(); i++){
+        countBestDec(tree->childs[i], bestIndex, bestValue);
+        if(tree->childs[i]->depth == 2){
+            if(tree->childs[i]->count < bestChildValue){
+                bestChildValue = tree->childs[i]->count;
+                bestChildIndex = i;
+            }
+        }
+        else{
+            if(tree->childs[i]->count > bestChildValue){
+                bestChildValue = tree->childs[i]->count;
+                bestChildIndex = i;
+            }
+        }
+    }
+    if(tree->childs.size() > 0){
+        bestChildValue += bestValue;
     }
 }
 

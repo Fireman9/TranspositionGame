@@ -37,7 +37,8 @@ public:
     void startGame();
     void aiTurn();
     bool checkForWin();
-    void calcCountRec(DecisionTree *tree);
+    void calcCountRec(DecisionTree *tree, int alpha, int beta);
+    void countBestDec(DecisionTree *tree, int& bestChildIndex, int& bestChildValue);
 
 private:
     Ui::MainWindow *ui;
